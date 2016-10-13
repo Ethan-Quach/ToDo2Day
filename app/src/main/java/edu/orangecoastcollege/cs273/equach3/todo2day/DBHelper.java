@@ -29,7 +29,7 @@ class DBHelper extends SQLiteOpenHelper {
     @Override
     public void onCreate (SQLiteDatabase database){
         String table = "CREATE TABLE " + DATABASE_TABLE + "("
-                + KEY_FIELD_ID + " INTEGER PRIMARY KEY, "
+                + KEY_FIELD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
                 + FIELD_DESCRIPTION + " TEXT, "
                 + FIELD_IS_DONE + " INTEGER" + ")";
         database.execSQL (table);
@@ -52,7 +52,6 @@ class DBHelper extends SQLiteOpenHelper {
 
         // Step 2: Create a key-value pair for each value you want to insert
         ContentValues values = new ContentValues();
-        values.put(KEY_FIELD_ID, newTask.getId());
         values.put(FIELD_DESCRIPTION, newTask.getDescription());
         values.put(FIELD_IS_DONE, newTask.getIsDone());
 
@@ -99,5 +98,32 @@ class DBHelper extends SQLiteOpenHelper {
         db.close();
 
         return allTasks;
+    }
+
+    public void updateTask (Task existingTask)
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+
+        ContentValues values = new ContentValues();
+        values.put(FIELD_DESCRIPTION, existingTask.getDescription());
+        values.put(FIELD_IS_DONE, existingTask.getIsDone());
+
+        // update() takes four parameters. In order:
+        // The table that's being edited, the values that should be changed (ContentValues),
+        // the record that needs to be modified (identified by primary key for that row),
+        // and the primary keys, sent in as a String array.
+        db.update(DATABASE_TABLE,
+                values,
+                KEY_FIELD_ID + "=?",
+                new String[] {String.valueOf(existingTask.getId())});
+
+        db.close();
+    }
+
+    public void deleteAllTasks ()
+    {
+        SQLiteDatabase db = this.getWritableDatabase();
+        db.delete(DATABASE_TABLE, null, null);
+        db.close();
     }
 }
